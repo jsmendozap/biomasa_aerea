@@ -18,7 +18,7 @@ names(raster)[1:2] <- c("HH", "HV")
 
 # Guardando archivos con valores de retrodispersión de las polarizaciones
 
-dir.create("retrodispersión")
+dir.create("1. Retrodispersión")
 
 ret <- function(x) { # Convierte los valores digitales a coeficientes de retrodispersión
   10 * log10(x^2) - 83
@@ -39,7 +39,7 @@ plot(HV, col = gray.colors(30, start = 0.3, end = 1), legend = T)
 
 # Aplicación del filtro de Lee para reducción de ruido
 
-dir.create("Lee")
+dir.create("2. Lee")
 
 library(whitebox)
 install_whitebox() # La primera vez que se instala la libreria se debe correr el comando para descargar el ejecutable
@@ -55,20 +55,14 @@ for (i in 1:2) {
 # Proyectando las imágenes a Magna Colombia-Bogotá EPSG: 3116 - Coordenadas planas
 
 imagenes <- list()
+dir.create('3. Procesadas')
 
 for (i in 1:2) {
   img <- raster(dir("Lee/", full.names = T)[i])
   imagenes[[i]] <- projectRaster(
     from = img, crs = "EPSG:3116",
-    filename = dir("Lee/")[i], overwrite = T
-  )
+    filename = paste('3. Procesadas/', names(img), '.tif', sep = ''), overwrite = T)
 }
 
 multibanda <- stack(imagenes)
-writeRaster(x = multibanda, filename = "Procesada", format = "GTiff")
 plotRGB(multibanda, r = 1, g = 2, b = 1, axes = T, stretch = "lin")
-
-b_nb <- projectRaster(
-  from = raster[[3]], crs = "EPSG:3116", filename = "b_nb",
-  overwrite = T, format = "GTiff"
-)
